@@ -1,0 +1,21 @@
+name: Background XBRL Sync
+on:
+  schedule:
+    - cron: '0 4,13 * * *' # Runs 2x daily (9:30 AM & 6:30 PM IST)
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: {python-version: '3.10'}
+      - run: pip install requests beautifulsoup4 pandas yfinance
+      - run: python main.py  # This runs your logic in the background
+      - name: Save Results
+        run: |
+          git config --global user.name "Auto-Bot"
+          git config --global user.email "bot@github.com"
+          git add xbrl_records.csv
+          git commit -m "Automated background update" || exit 0
+          git push
